@@ -1,6 +1,6 @@
 # Hogwarts Living Agent OS — Specification Pack v0.4
 
-**Status:** architecture/design baseline, not an implemented application.  
+**Status:** M0/M1 governance implementation with fake adapters; see [latest verification](docs/09-M1-FIX-VERIFICATION.md).
 **Date:** 2026-10-23  
 **Language:** zh-TW. Technical identifiers in English.
 
@@ -36,3 +36,19 @@
 
 ## Working principle
 不能以 Agent 的敘述作為「完成」證據。實際工件、Git Diff、受信任測試工具輸出、審批記錄才是工程事實。
+
+## M0/M1 implementation
+
+- `apps/api/hogwarts`: FastAPI API、typed schemas、授權、CAS 狀態機與交易式事件紀錄。
+- `infra/migrations`: M0 foundation 與 M1 governance schema；PostgreSQL 為正式資料來源。
+- `workers/engineering/worker.py`: 明確指定單一工作的 fake worker，沒有自治迴圈。
+- `tests`: SQLite 與 PostgreSQL 的 migration、權限、冪等、併發與 fake workflow 測試。
+- `compose.yaml`、`infra/Dockerfile`、`.github/workflows/ci.yml`: 本機與 CI 設定。
+- [開發與環境設定](docs/06-DEVELOPMENT.md)、[API 說明](docs/07-API.md)、[決策紀錄](docs/adr/0002-m1-governance.md)。
+
+本階段沒有真實 Codex、Git sandbox、世界 UI 或正式 merge/deploy。Fake QA
+明確標記 `verified: false`，不代表目標專案的測試已通過。M2–M5 尚未實作。
+
+M1 驗收發現的稽核與 token 處理問題已修正；設計細節見
+[ADR 0003](docs/adr/0003-m1-acceptance-fixes.md)，複驗證據見
+[M1 修復與複驗報告](docs/09-M1-FIX-VERIFICATION.md)。

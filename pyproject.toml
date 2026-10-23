@@ -1,0 +1,28 @@
+[project]
+name = "hogwarts-living-agent"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115,<1", "pydantic>=2,<3", "SQLAlchemy>=2.0,<2.1",
+  "alembic>=1.13,<2", "psycopg[binary]>=3.2,<4", "uvicorn>=0.30,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "httpx>=0.27,<1", "ruff>=0.9,<1", "jsonschema>=4,<5"]
+
+[tool.pytest.ini_options]
+pythonpath = ["apps/api", "workers"]
+testpaths = ["tests"]
+addopts = "-ra -p no:cacheprovider"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+include = ["*.py", "*.pyi", "pyproject.toml"]
+extend-exclude = ["pytest-cache-files-*", "test-results"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"apps/api/hogwarts/main.py" = ["B008"]

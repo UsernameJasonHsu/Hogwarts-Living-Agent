@@ -1,0 +1,33 @@
+name: M0-M1 verification
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: hogwarts
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: hogwarts_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U hogwarts -d hogwarts_test"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://hogwarts:ci-only@localhost:5432/hogwarts_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements.lock
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest -v --junitxml=test-results/junit.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
