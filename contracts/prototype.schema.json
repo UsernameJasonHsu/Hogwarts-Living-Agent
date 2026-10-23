@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/hogwarts/prototype.schema.json",
+  "title": "Prototype Proposal v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposal_id", "project_id", "created_by", "origin", "title", "problem", "prototype", "acceptance_criteria"],
+  "properties": {
+    "proposal_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "created_by": {"type": "string", "minLength": 1},
+    "origin": {"enum": ["assigned", "reactive", "self_proposed"]},
+    "title": {"type": "string", "minLength": 1},
+    "problem": {
+      "type": "object", "required": ["description", "evidence"], "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "object", "required": ["type", "source_ref"], "additionalProperties": false, "properties": {"type": {"type": "string"}, "source_ref": {"type": "string"}}}}
+      }
+    },
+    "prototype": {
+      "type": "object", "additionalProperties": false,
+      "required": ["base_commit", "allowed_paths", "max_runtime_seconds"],
+      "properties": {
+        "base_commit": {"type": "string", "minLength": 7},
+        "allowed_paths": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "max_runtime_seconds": {"type": "integer", "minimum": 1, "maximum": 3600}
+      }
+    },
+    "acceptance_criteria": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  }
+}

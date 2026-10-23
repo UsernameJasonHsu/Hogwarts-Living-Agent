@@ -1,0 +1,29 @@
+# Illustrative application policy, not Codex native config.
+autonomy:
+  mode: sandbox_prototype
+  require_preapproved_repository: true
+  default_action: deny
+  world_tick_interval_seconds: 60
+  max_social_events_per_hour: 6
+  max_daily_proposals: 5
+  agents:
+    max_active_workflows_per_agent: 1
+    goal_switch_threshold: 15
+    goal_rejection_cooldown_minutes: 180
+  engineering:
+    max_concurrent_workers: 2
+    max_task_retries: 2
+    default_network: deny
+    sandbox_required: true
+    allow_direct_main_write: false
+    production_deploy_allowed: false
+  approval_required:
+    - protected_branch_merge
+    - production_deployment
+    - destructive_database_changes
+    - permission_escalation
+    - external_publication
+  budget:
+    agent_daily_usd: 1.0
+    organization_daily_usd: 5.0
+    stop_on_exhaustion: true

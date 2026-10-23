@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/hogwarts/event.schema.json",
+  "title": "Workflow Event Envelope v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["event_id", "event_type", "schema_version", "occurred_at", "source", "correlation_id", "payload"],
+  "properties": {
+    "event_id": {"type": "string", "minLength": 1},
+    "event_type": {"type": "string", "pattern": "^[a-z]+(\\.[a-z_]+)+$"},
+    "schema_version": {"type": "integer", "minimum": 1},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "source": {"type": "string", "minLength": 1},
+    "correlation_id": {"type": "string", "minLength": 1},
+    "idempotency_key": {"type": ["string", "null"]},
+    "agent_id": {"type": ["string", "null"]},
+    "project_id": {"type": ["string", "null"]},
+    "task_id": {"type": ["string", "null"]},
+    "payload": {"type": "object"}
+  }
+}
