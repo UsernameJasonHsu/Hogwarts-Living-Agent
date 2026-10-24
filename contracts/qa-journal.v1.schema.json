@@ -1,0 +1,200 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "qa_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Qa Id",
+      "type": "string"
+    },
+    "run_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "build_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Build Id",
+      "type": "string"
+    },
+    "import_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Import Id",
+      "type": "string"
+    },
+    "workspace_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "sandbox_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Sandbox Id",
+      "type": "string"
+    },
+    "worker_id": {
+      "title": "Worker Id",
+      "type": "string"
+    },
+    "controller_id": {
+      "pattern": "^[a-z0-9-]{1,40}$",
+      "title": "Controller Id",
+      "type": "string"
+    },
+    "lease_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Lease Hash",
+      "type": "string"
+    },
+    "request_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Request Hash",
+      "type": "string"
+    },
+    "profile_name": {
+      "title": "Profile Name",
+      "type": "string"
+    },
+    "profile_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Profile Sha256",
+      "type": "string"
+    },
+    "seal_key": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Seal Key",
+      "type": "string"
+    },
+    "expires_at": {
+      "title": "Expires At",
+      "type": "string"
+    },
+    "state": {
+      "default": "PENDING",
+      "enum": [
+        "PENDING",
+        "EXECUTING",
+        "CAPTURED",
+        "PUBLISHING",
+        "READY"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "container_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Container Id"
+    },
+    "input_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Input Sha256",
+      "type": "string"
+    },
+    "result_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Result Sha256"
+    },
+    "outcome": {
+      "anyOf": [
+        {
+          "enum": [
+            "pass",
+            "fail",
+            "timeout",
+            "infrastructure_error",
+            "unknown_execution"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Outcome"
+    },
+    "attestation_artifact_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Attestation Artifact Id"
+    },
+    "attestation_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Attestation Sha256"
+    },
+    "cleanup_complete": {
+      "default": false,
+      "title": "Cleanup Complete",
+      "type": "boolean"
+    },
+    "cleanup_requested": {
+      "default": false,
+      "title": "Cleanup Requested",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "qa_id",
+    "run_id",
+    "build_id",
+    "import_id",
+    "workspace_id",
+    "sandbox_id",
+    "worker_id",
+    "controller_id",
+    "lease_hash",
+    "request_hash",
+    "profile_name",
+    "profile_sha256",
+    "seal_key",
+    "expires_at",
+    "input_sha256"
+  ],
+  "title": "QAJournal",
+  "type": "object"
+}

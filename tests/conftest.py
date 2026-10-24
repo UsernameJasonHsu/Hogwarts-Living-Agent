@@ -1,5 +1,6 @@
 import os
 import shutil
+import stat
 import uuid
 from pathlib import Path
 
@@ -24,7 +25,24 @@ def tmp_path():
     try:
         yield path.resolve()
     finally:
-        shutil.rmtree(path)
+        boundary = path.resolve()
+        assert boundary.is_relative_to(Path("test-results/tmp").resolve())
+
+        def clear_readonly(function, target, error):
+            # Windows Git object files have the read-only attribute; only change
+            # regular files inside this test's explicitly checked temporary root.
+            file = Path(target)
+            if (
+                not isinstance(error, PermissionError)
+                or not file.resolve().is_relative_to(boundary)
+                or not file.is_file()
+                or file.is_symlink()
+            ):
+                raise error
+            file.chmod(file.stat().st_mode | stat.S_IWRITE)
+            function(target)
+
+        shutil.rmtree(path, onexc=clear_readonly)
 
 
 @pytest.fixture(params=["sqlite", "postgresql"])

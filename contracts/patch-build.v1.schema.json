@@ -1,0 +1,254 @@
+{
+  "$defs": {
+    "BuildProof": {
+      "additionalProperties": false,
+      "properties": {
+        "builder_version": {
+          "const": "trusted-git-patch-builder.v1",
+          "default": "trusted-git-patch-builder.v1",
+          "title": "Builder Version",
+          "type": "string"
+        },
+        "base_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Base Commit",
+          "type": "string"
+        },
+        "base_tree": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Base Tree",
+          "type": "string"
+        },
+        "result_tree": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Result Tree",
+          "type": "string"
+        },
+        "git_version": {
+          "title": "Git Version",
+          "type": "string"
+        },
+        "import_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Import Manifest Sha256",
+          "type": "string"
+        },
+        "changed_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Changed Paths",
+          "type": "array"
+        },
+        "source_files": {
+          "items": {
+            "$ref": "#/$defs/ImportedFile"
+          },
+          "title": "Source Files",
+          "type": "array"
+        },
+        "applicability": {
+          "enum": [
+            "applicable",
+            "empty_no_changes"
+          ],
+          "title": "Applicability",
+          "type": "string"
+        },
+        "assessment": {
+          "const": "unverified",
+          "default": "unverified",
+          "title": "Assessment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "base_commit",
+        "base_tree",
+        "result_tree",
+        "git_version",
+        "import_manifest_sha256",
+        "changed_paths",
+        "source_files",
+        "applicability"
+      ],
+      "title": "BuildProof",
+      "type": "object"
+    },
+    "ImportedFile": {
+      "additionalProperties": false,
+      "properties": {
+        "source_path": {
+          "title": "Source Path",
+          "type": "string"
+        },
+        "target_path": {
+          "title": "Target Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 4194304,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "artifact_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Artifact Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_path",
+        "target_path",
+        "sha256",
+        "size_bytes",
+        "artifact_id"
+      ],
+      "title": "ImportedFile",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "build_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Build Id",
+      "type": "string"
+    },
+    "run_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "import_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Import Id",
+      "type": "string"
+    },
+    "workspace_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "sandbox_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Sandbox Id",
+      "type": "string"
+    },
+    "state": {
+      "default": "PENDING",
+      "enum": [
+        "PENDING",
+        "BUILDING",
+        "BUILT",
+        "PUBLISHING",
+        "READY",
+        "FAILED"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "patch_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Patch Sha256"
+    },
+    "proof": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BuildProof"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "proof_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proof Sha256"
+    },
+    "patch_artifact_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Patch Artifact Id"
+    },
+    "proof_artifact_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proof Artifact Id"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    }
+  },
+  "required": [
+    "build_id",
+    "run_id",
+    "import_id",
+    "workspace_id",
+    "sandbox_id"
+  ],
+  "title": "BuildJournal",
+  "type": "object"
+}

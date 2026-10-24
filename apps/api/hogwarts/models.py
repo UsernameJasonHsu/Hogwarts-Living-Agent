@@ -150,3 +150,117 @@ class MergeRequest(Base):
     target_branch: Mapped[str] = mapped_column(String(100))
     approval_id: Mapped[str] = mapped_column(ForeignKey("approval_requests.id"))
     status: Mapped[str] = mapped_column(String(50), default="PENDING_SEPARATE_APPROVAL")
+
+
+class GitWorkspace(Base):
+    """M2.1 lifecycle/provenance only. Does not represent a security sandbox."""
+
+    __tablename__ = "git_workspaces"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("prototype_runs.id"), unique=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"))
+    owner_id: Mapped[str] = mapped_column(String(100), index=True)
+    repository_path: Mapped[str] = mapped_column(String(1000))
+    base_commit: Mapped[str] = mapped_column(String(40))
+    allowed_paths: Mapped[list] = mapped_column(JSON)
+    request_hash: Mapped[str] = mapped_column(String(64))
+    lease_hash: Mapped[str] = mapped_column(String(64))
+    state: Mapped[str] = mapped_column(String(30), default="CREATING")
+    version: Mapped[int] = mapped_column(default=1)
+    error_code: Mapped[str | None] = mapped_column(String(100))
+    last_diff_sha256: Mapped[str | None] = mapped_column(String(64))
+    last_changed_files: Mapped[list | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        CheckConstraint(
+            "state IN ('CREATING','READY','FAILED','CLEANING','CLEANUP_FAILED','CLEANED')"
+        ),
+    )
+
+
+class SandboxInstance(Base):
+    """M2.2 durable controller intent, not an artifact or QA verdict."""
+
+    __tablename__ = "sandbox_instances"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("prototype_runs.id"), unique=True)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("git_workspaces.id"), unique=True)
+    owner_id: Mapped[str] = mapped_column(String(100))
+    lease_hash: Mapped[str] = mapped_column(String(64))
+    profile_name: Mapped[str] = mapped_column(String(40))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    snapshot_sha256: Mapped[str] = mapped_column(String(64))
+    container_id: Mapped[str | None] = mapped_column(String(64))
+    version: Mapped[int] = mapped_column(default=1)
+    state: Mapped[str] = mapped_column(String(30), default="CREATING")
+    error_code: Mapped[str | None] = mapped_column(String(100))
+    lifetime_seconds: Mapped[int]
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    invocation_id: Mapped[str | None] = mapped_column(String(64))
+    result: Mapped[dict | None] = mapped_column(JSON)
+    __table_args__ = (
+        CheckConstraint(
+            "state IN ('CREATING','CREATED','RUNNING','EXECUTING','COMPLETED',"
+            "'FAILED','STOPPED','DESTROYED','CLEANUP_FAILED')"
+        ),
+    )
+
+
+class ArtifactMetadata(Base):
+    """M2.3.1 immutable provenance with separately tracked storage lifecycle."""
+
+    __tablename__ = "artifact_metadata"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("prototype_runs.id"))
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("git_workspaces.id"))
+    sandbox_id: Mapped[str] = mapped_column(ForeignKey("sandbox_instances.id"))
+    owner_id: Mapped[str] = mapped_column(String(100))
+    producer_id: Mapped[str] = mapped_column(String(100))
+    lease_hash: Mapped[str] = mapped_column(String(64))
+    idempotency_hash: Mapped[str] = mapped_column(String(64))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    sha256: Mapped[str] = mapped_column(String(64))
+    size_bytes: Mapped[int]
+    schema_version: Mapped[int] = mapped_column(default=1)
+    evidence: Mapped[dict] = mapped_column(JSON)
+    metadata_sha256: Mapped[str] = mapped_column(String(64))
+    state: Mapped[str] = mapped_column(String(20), default="PENDING")
+    version: Mapped[int] = mapped_column(default=1)
+    error_code: Mapped[str | None] = mapped_column(String(100))
+    __table_args__ = (
+        UniqueConstraint("run_id", "producer_id", "idempotency_hash"),
+        CheckConstraint("state IN ('PENDING','READY','FAILED','CORRUPT')"),
+        CheckConstraint("schema_version >= 1"),
+        CheckConstraint("size_bytes >= 0 AND size_bytes <= 16777216"),
+    )
+
+
+class OutputImport(Base):
+    """M2.3.2 durable, authenticated output capture; never a QA verdict."""
+
+    __tablename__ = "output_imports"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("prototype_runs.id"))
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("git_workspaces.id"))
+    sandbox_id: Mapped[str] = mapped_column(ForeignKey("sandbox_instances.id"), unique=True)
+    owner_id: Mapped[str] = mapped_column(String(100))
+    producer_id: Mapped[str] = mapped_column(String(100))
+    lease_hash: Mapped[str] = mapped_column(String(64))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    seal_key: Mapped[str] = mapped_column(String(64))
+    state: Mapped[str] = mapped_column(String(30), default="PENDING")
+    version: Mapped[int] = mapped_column(default=1)
+    error_code: Mapped[str | None] = mapped_column(String(100))
+    archive_sha256: Mapped[str | None] = mapped_column(String(64))
+    proof: Mapped[dict | None] = mapped_column(JSON)
+    files: Mapped[list] = mapped_column(JSON, default=list)
+    manifest_artifact_id: Mapped[str | None] = mapped_column(ForeignKey("artifact_metadata.id"))
+    manifest_sha256: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        CheckConstraint(
+            "state IN ('PENDING','SNAPSHOTTING','SNAPSHOT_READY','IMPORTING','IMPORTED',"
+            "'REJECTED','FAILED','UNCERTAIN')"
+        ),
+    )
