@@ -1,4 +1,4 @@
-name: M0-M2.2 verification
+name: M0-M2.3.2 verification
 on: [push, pull_request]
 jobs:
   verify:
@@ -29,6 +29,10 @@ jobs:
         run: docker build -t hogwarts-sandbox:ci infra/sandbox
       - name: Pin approved sandbox image for integration tests
         run: echo "HOGWARTS_SANDBOX_IMAGE=$(docker image inspect hogwarts-sandbox:ci --format '{{.Id}}')" >> "$GITHUB_ENV"
+      - name: Build trusted output reader image
+        run: docker build -t hogwarts-output-reader:ci infra/output-reader
+      - name: Pin approved output reader image for integration tests
+        run: echo "HOGWARTS_OUTPUT_READER_IMAGE=$(docker image inspect hogwarts-output-reader:ci --format '{{.Id}}')" >> "$GITHUB_ENV"
       - run: pytest -v --junitxml=test-results/junit.xml
       - uses: actions/upload-artifact@v4
         if: always()

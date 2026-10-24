@@ -234,3 +234,33 @@ class ArtifactMetadata(Base):
         CheckConstraint("schema_version >= 1"),
         CheckConstraint("size_bytes >= 0 AND size_bytes <= 16777216"),
     )
+
+
+class OutputImport(Base):
+    """M2.3.2 durable, authenticated output capture; never a QA verdict."""
+
+    __tablename__ = "output_imports"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("prototype_runs.id"))
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("git_workspaces.id"))
+    sandbox_id: Mapped[str] = mapped_column(ForeignKey("sandbox_instances.id"), unique=True)
+    owner_id: Mapped[str] = mapped_column(String(100))
+    producer_id: Mapped[str] = mapped_column(String(100))
+    lease_hash: Mapped[str] = mapped_column(String(64))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    seal_key: Mapped[str] = mapped_column(String(64))
+    state: Mapped[str] = mapped_column(String(30), default="PENDING")
+    version: Mapped[int] = mapped_column(default=1)
+    error_code: Mapped[str | None] = mapped_column(String(100))
+    archive_sha256: Mapped[str | None] = mapped_column(String(64))
+    proof: Mapped[dict | None] = mapped_column(JSON)
+    files: Mapped[list] = mapped_column(JSON, default=list)
+    manifest_artifact_id: Mapped[str | None] = mapped_column(ForeignKey("artifact_metadata.id"))
+    manifest_sha256: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        CheckConstraint(
+            "state IN ('PENDING','SNAPSHOTTING','SNAPSHOT_READY','IMPORTING','IMPORTED',"
+            "'REJECTED','FAILED','UNCERTAIN')"
+        ),
+    )
