@@ -177,3 +177,31 @@ class GitWorkspace(Base):
             "state IN ('CREATING','READY','FAILED','CLEANING','CLEANUP_FAILED','CLEANED')"
         ),
     )
+
+
+class SandboxInstance(Base):
+    """M2.2 durable controller intent, not an artifact or QA verdict."""
+
+    __tablename__ = "sandbox_instances"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("prototype_runs.id"), unique=True)
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("git_workspaces.id"), unique=True)
+    owner_id: Mapped[str] = mapped_column(String(100))
+    lease_hash: Mapped[str] = mapped_column(String(64))
+    profile_name: Mapped[str] = mapped_column(String(40))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    snapshot_sha256: Mapped[str] = mapped_column(String(64))
+    container_id: Mapped[str | None] = mapped_column(String(64))
+    version: Mapped[int] = mapped_column(default=1)
+    state: Mapped[str] = mapped_column(String(30), default="CREATING")
+    error_code: Mapped[str | None] = mapped_column(String(100))
+    lifetime_seconds: Mapped[int]
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    invocation_id: Mapped[str | None] = mapped_column(String(64))
+    result: Mapped[dict | None] = mapped_column(JSON)
+    __table_args__ = (
+        CheckConstraint(
+            "state IN ('CREATING','CREATED','RUNNING','EXECUTING','COMPLETED',"
+            "'FAILED','STOPPED','DESTROYED','CLEANUP_FAILED')"
+        ),
+    )
