@@ -150,3 +150,30 @@ class MergeRequest(Base):
     target_branch: Mapped[str] = mapped_column(String(100))
     approval_id: Mapped[str] = mapped_column(ForeignKey("approval_requests.id"))
     status: Mapped[str] = mapped_column(String(50), default="PENDING_SEPARATE_APPROVAL")
+
+
+class GitWorkspace(Base):
+    """M2.1 lifecycle/provenance only. Does not represent a security sandbox."""
+
+    __tablename__ = "git_workspaces"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("prototype_runs.id"), unique=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"))
+    owner_id: Mapped[str] = mapped_column(String(100), index=True)
+    repository_path: Mapped[str] = mapped_column(String(1000))
+    base_commit: Mapped[str] = mapped_column(String(40))
+    allowed_paths: Mapped[list] = mapped_column(JSON)
+    request_hash: Mapped[str] = mapped_column(String(64))
+    lease_hash: Mapped[str] = mapped_column(String(64))
+    state: Mapped[str] = mapped_column(String(30), default="CREATING")
+    version: Mapped[int] = mapped_column(default=1)
+    error_code: Mapped[str | None] = mapped_column(String(100))
+    last_diff_sha256: Mapped[str | None] = mapped_column(String(64))
+    last_changed_files: Mapped[list | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        CheckConstraint(
+            "state IN ('CREATING','READY','FAILED','CLEANING','CLEANUP_FAILED','CLEANED')"
+        ),
+    )
