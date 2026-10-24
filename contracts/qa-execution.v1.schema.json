@@ -1,0 +1,272 @@
+{
+  "$defs": {
+    "LogRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 262144,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "sha256",
+        "size_bytes"
+      ],
+      "title": "LogRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "issuer": {
+      "const": "trusted-qa-runner.v1",
+      "default": "trusted-qa-runner.v1",
+      "title": "Issuer",
+      "type": "string"
+    },
+    "authority": {
+      "const": "controller_journal_and_hmac_capsule",
+      "default": "controller_journal_and_hmac_capsule",
+      "title": "Authority",
+      "type": "string"
+    },
+    "qa_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Qa Id",
+      "type": "string"
+    },
+    "run_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "worker_id": {
+      "title": "Worker Id",
+      "type": "string"
+    },
+    "controller_id": {
+      "pattern": "^[a-z0-9-]{1,40}$",
+      "title": "Controller Id",
+      "type": "string"
+    },
+    "workspace_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "original_sandbox_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Original Sandbox Id",
+      "type": "string"
+    },
+    "qa_sandbox_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Qa Sandbox Id",
+      "type": "string"
+    },
+    "build_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Build Id",
+      "type": "string"
+    },
+    "patch_artifact_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Patch Artifact Id",
+      "type": "string"
+    },
+    "patch_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Patch Sha256",
+      "type": "string"
+    },
+    "build_proof_artifact_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Build Proof Artifact Id",
+      "type": "string"
+    },
+    "build_proof_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Build Proof Sha256",
+      "type": "string"
+    },
+    "base_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Base Commit",
+      "type": "string"
+    },
+    "result_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Result Tree",
+      "type": "string"
+    },
+    "profile_name": {
+      "title": "Profile Name",
+      "type": "string"
+    },
+    "profile_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Profile Sha256",
+      "type": "string"
+    },
+    "argv": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Argv",
+      "type": "array"
+    },
+    "container_argv": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Container Argv",
+      "type": "array"
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Image Id",
+      "type": "string"
+    },
+    "input_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Input Sha256",
+      "type": "string"
+    },
+    "resource_limits": {
+      "additionalProperties": true,
+      "title": "Resource Limits",
+      "type": "object"
+    },
+    "container_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Container Id"
+    },
+    "outcome": {
+      "enum": [
+        "pass",
+        "fail",
+        "timeout",
+        "infrastructure_error",
+        "unknown_execution"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "exit_code": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Exit Code"
+    },
+    "started_at": {
+      "title": "Started At",
+      "type": "string"
+    },
+    "finished_at": {
+      "title": "Finished At",
+      "type": "string"
+    },
+    "oom_killed": {
+      "title": "Oom Killed",
+      "type": "boolean"
+    },
+    "timed_out": {
+      "title": "Timed Out",
+      "type": "boolean"
+    },
+    "cleanup_complete": {
+      "title": "Cleanup Complete",
+      "type": "boolean"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Error Code"
+    },
+    "stdout": {
+      "$ref": "#/$defs/LogRef"
+    },
+    "stderr": {
+      "$ref": "#/$defs/LogRef"
+    },
+    "content_assessment": {
+      "const": "unverified",
+      "default": "unverified",
+      "title": "Content Assessment",
+      "type": "string"
+    }
+  },
+  "required": [
+    "qa_id",
+    "run_id",
+    "worker_id",
+    "controller_id",
+    "workspace_id",
+    "original_sandbox_id",
+    "qa_sandbox_id",
+    "build_id",
+    "patch_artifact_id",
+    "patch_sha256",
+    "build_proof_artifact_id",
+    "build_proof_sha256",
+    "base_commit",
+    "result_tree",
+    "profile_name",
+    "profile_sha256",
+    "argv",
+    "container_argv",
+    "image_id",
+    "input_sha256",
+    "resource_limits",
+    "container_id",
+    "outcome",
+    "exit_code",
+    "started_at",
+    "finished_at",
+    "oom_killed",
+    "timed_out",
+    "cleanup_complete",
+    "error_code",
+    "stdout",
+    "stderr"
+  ],
+  "title": "QAExecutionAttestation",
+  "type": "object"
+}
