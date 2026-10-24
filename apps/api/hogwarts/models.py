@@ -205,3 +205,32 @@ class SandboxInstance(Base):
             "'FAILED','STOPPED','DESTROYED','CLEANUP_FAILED')"
         ),
     )
+
+
+class ArtifactMetadata(Base):
+    """M2.3.1 immutable provenance with separately tracked storage lifecycle."""
+
+    __tablename__ = "artifact_metadata"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("prototype_runs.id"))
+    workspace_id: Mapped[str] = mapped_column(ForeignKey("git_workspaces.id"))
+    sandbox_id: Mapped[str] = mapped_column(ForeignKey("sandbox_instances.id"))
+    owner_id: Mapped[str] = mapped_column(String(100))
+    producer_id: Mapped[str] = mapped_column(String(100))
+    lease_hash: Mapped[str] = mapped_column(String(64))
+    idempotency_hash: Mapped[str] = mapped_column(String(64))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    sha256: Mapped[str] = mapped_column(String(64))
+    size_bytes: Mapped[int]
+    schema_version: Mapped[int] = mapped_column(default=1)
+    evidence: Mapped[dict] = mapped_column(JSON)
+    metadata_sha256: Mapped[str] = mapped_column(String(64))
+    state: Mapped[str] = mapped_column(String(20), default="PENDING")
+    version: Mapped[int] = mapped_column(default=1)
+    error_code: Mapped[str | None] = mapped_column(String(100))
+    __table_args__ = (
+        UniqueConstraint("run_id", "producer_id", "idempotency_hash"),
+        CheckConstraint("state IN ('PENDING','READY','FAILED','CORRUPT')"),
+        CheckConstraint("schema_version >= 1"),
+        CheckConstraint("size_bytes >= 0 AND size_bytes <= 16777216"),
+    )

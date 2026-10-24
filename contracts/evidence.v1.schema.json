@@ -1,0 +1,316 @@
+{
+  "$defs": {
+    "Assessment": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "verified"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "trusted_verifier"
+              },
+              "verifier_ref": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "verifier_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unverified"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "no_trusted_verifier"
+              },
+              "verifier_ref": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "failed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "storage_failed",
+                  "integrity_failed"
+                ]
+              },
+              "verifier_ref": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "verified",
+            "unverified",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "no_trusted_verifier",
+            "storage_failed",
+            "integrity_failed",
+            "trusted_verifier"
+          ],
+          "title": "Reason",
+          "type": "string"
+        },
+        "verifier_ref": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verifier Ref"
+        }
+      },
+      "required": [
+        "status",
+        "reason"
+      ],
+      "title": "Assessment",
+      "type": "object"
+    },
+    "ExecutionSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "controller_state": {
+          "maxLength": 30,
+          "minLength": 1,
+          "title": "Controller State",
+          "type": "string"
+        },
+        "controller_version": {
+          "minimum": 1,
+          "title": "Controller Version",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "unknown",
+            "succeeded",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Started At"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        }
+      },
+      "required": [
+        "controller_state",
+        "controller_version",
+        "status"
+      ],
+      "title": "ExecutionSnapshot",
+      "type": "object"
+    },
+    "ImmutableArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "run_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "sandbox_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Sandbox Id",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 16777216,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "report",
+            "patch",
+            "log",
+            "binary"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "media_type": {
+          "enum": [
+            "text/plain",
+            "application/json",
+            "application/octet-stream"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "source": {
+          "const": "agent_submission",
+          "default": "agent_submission",
+          "title": "Source",
+          "type": "string"
+        },
+        "producer_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Producer Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "base_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Base Commit",
+          "type": "string"
+        },
+        "sandbox_input_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sandbox Input Sha256",
+          "type": "string"
+        },
+        "execution": {
+          "$ref": "#/$defs/ExecutionSnapshot"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "run_id",
+        "workspace_id",
+        "sandbox_id",
+        "sha256",
+        "size_bytes",
+        "kind",
+        "media_type",
+        "producer_id",
+        "created_at",
+        "base_commit",
+        "sandbox_input_sha256",
+        "execution"
+      ],
+      "title": "ImmutableArtifact",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "artifact": {
+      "$ref": "#/$defs/ImmutableArtifact"
+    },
+    "storage_state": {
+      "enum": [
+        "PENDING",
+        "READY",
+        "FAILED",
+        "CORRUPT"
+      ],
+      "title": "Storage State",
+      "type": "string"
+    },
+    "assessment": {
+      "$ref": "#/$defs/Assessment"
+    },
+    "integrity": {
+      "default": "not_checked",
+      "enum": [
+        "not_checked",
+        "valid",
+        "failed"
+      ],
+      "title": "Integrity",
+      "type": "string"
+    }
+  },
+  "required": [
+    "artifact",
+    "storage_state",
+    "assessment"
+  ],
+  "title": "EvidenceDocument",
+  "type": "object"
+}
