@@ -1,0 +1,149 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "plan_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "run_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "owner_id": {
+      "title": "Owner Id",
+      "type": "string"
+    },
+    "actor_id": {
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "generation": {
+      "title": "Generation",
+      "type": "integer"
+    },
+    "lease_version": {
+      "title": "Lease Version",
+      "type": "integer"
+    },
+    "cleanup_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Cleanup Id",
+      "type": "string"
+    },
+    "cleanup_version": {
+      "title": "Cleanup Version",
+      "type": "integer"
+    },
+    "policy_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Policy Sha256",
+      "type": "string"
+    },
+    "references_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "References Sha256",
+      "type": "string"
+    },
+    "resources_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Resources Sha256",
+      "type": "string"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "eligible": {
+      "title": "Eligible",
+      "type": "boolean"
+    },
+    "reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    },
+    "state": {
+      "default": "DRY_RUN",
+      "enum": [
+        "DRY_RUN",
+        "APPROVED",
+        "EXECUTING",
+        "COMPLETE",
+        "BLOCKED",
+        "UNKNOWN"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "approved_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approved By"
+    },
+    "approval_expires_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approval Expires At"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    }
+  },
+  "required": [
+    "plan_id",
+    "run_id",
+    "owner_id",
+    "actor_id",
+    "generation",
+    "lease_version",
+    "cleanup_id",
+    "cleanup_version",
+    "policy_sha256",
+    "references_sha256",
+    "resources_sha256",
+    "created_at",
+    "eligible",
+    "reasons"
+  ],
+  "title": "GCJournal",
+  "type": "object"
+}

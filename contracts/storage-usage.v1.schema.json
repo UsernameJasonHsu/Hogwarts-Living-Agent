@@ -1,0 +1,70 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "logical_bytes": {
+      "maximum": 1125899906842624,
+      "minimum": 0,
+      "title": "Logical Bytes",
+      "type": "integer"
+    },
+    "declared_artifact_bytes": {
+      "maximum": 1125899906842624,
+      "minimum": 0,
+      "title": "Declared Artifact Bytes",
+      "type": "integer"
+    },
+    "unmaterialized_artifact_bytes": {
+      "default": 0,
+      "maximum": 1125899906842624,
+      "minimum": 0,
+      "title": "Unmaterialized Artifact Bytes",
+      "type": "integer"
+    },
+    "incomplete_artifact_count": {
+      "default": 0,
+      "maximum": 1125899906842624,
+      "minimum": 0,
+      "title": "Incomplete Artifact Count",
+      "type": "integer"
+    },
+    "artifact_count": {
+      "maximum": 1125899906842624,
+      "minimum": 0,
+      "title": "Artifact Count",
+      "type": "integer"
+    },
+    "file_count": {
+      "maximum": 1125899906842624,
+      "minimum": 0,
+      "title": "File Count",
+      "type": "integer"
+    },
+    "free_bytes_min": {
+      "maximum": 1125899906842624,
+      "minimum": 0,
+      "title": "Free Bytes Min",
+      "type": "integer"
+    },
+    "fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Fingerprint",
+      "type": "string"
+    }
+  },
+  "required": [
+    "logical_bytes",
+    "declared_artifact_bytes",
+    "artifact_count",
+    "file_count",
+    "free_bytes_min",
+    "fingerprint"
+  ],
+  "title": "StorageUsage",
+  "type": "object"
+}

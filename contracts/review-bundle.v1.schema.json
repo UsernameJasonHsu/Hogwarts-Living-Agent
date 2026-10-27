@@ -1,0 +1,239 @@
+{
+  "$defs": {
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 16777216,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "sha256",
+        "size_bytes"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "issuer": {
+      "const": "prototype-verification.v1",
+      "default": "prototype-verification.v1",
+      "title": "Issuer",
+      "type": "string"
+    },
+    "verification_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Verification Id",
+      "type": "string"
+    },
+    "run_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "workspace_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "sandbox_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Sandbox Id",
+      "type": "string"
+    },
+    "worker_id": {
+      "title": "Worker Id",
+      "type": "string"
+    },
+    "base_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Base Commit",
+      "type": "string"
+    },
+    "configuration_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Configuration Sha256",
+      "type": "string"
+    },
+    "proposal_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Proposal Sha256",
+      "type": "string"
+    },
+    "profile_name": {
+      "title": "Profile Name",
+      "type": "string"
+    },
+    "profile_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Profile Sha256",
+      "type": "string"
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Image Id",
+      "type": "string"
+    },
+    "build_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Build Id"
+    },
+    "qa_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Qa Id"
+    },
+    "attestation_artifact_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Attestation Artifact Id"
+    },
+    "patch_artifact_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Patch Artifact Id",
+      "type": "string"
+    },
+    "build_proof_artifact_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Build Proof Artifact Id",
+      "type": "string"
+    },
+    "input_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Input Sha256",
+      "type": "string"
+    },
+    "result_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Result Tree",
+      "type": "string"
+    },
+    "changed_paths": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Changed Paths",
+      "type": "array"
+    },
+    "verdict": {
+      "enum": [
+        "READY_FOR_HUMAN_REVIEW",
+        "FAILED",
+        "BLOCKED",
+        "UNKNOWN"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    },
+    "tests_executed": {
+      "minimum": 0,
+      "title": "Tests Executed",
+      "type": "integer"
+    },
+    "test_count_authority": {
+      "enum": [
+        "approved_image_exit_protocol",
+        "insufficient_evidence"
+      ],
+      "title": "Test Count Authority",
+      "type": "string"
+    },
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      },
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "assessment": {
+      "const": "unverified",
+      "default": "unverified",
+      "title": "Assessment",
+      "type": "string"
+    }
+  },
+  "required": [
+    "verification_id",
+    "run_id",
+    "workspace_id",
+    "sandbox_id",
+    "worker_id",
+    "base_commit",
+    "configuration_sha256",
+    "proposal_sha256",
+    "profile_name",
+    "profile_sha256",
+    "image_id",
+    "build_id",
+    "qa_id",
+    "attestation_artifact_id",
+    "patch_artifact_id",
+    "build_proof_artifact_id",
+    "input_sha256",
+    "result_tree",
+    "changed_paths",
+    "verdict",
+    "reasons",
+    "tests_executed",
+    "test_count_authority",
+    "artifacts",
+    "created_at"
+  ],
+  "title": "ReviewBundle",
+  "type": "object"
+}

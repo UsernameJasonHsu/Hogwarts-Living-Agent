@@ -155,7 +155,11 @@ class LocalTrustedQARunner:
                 raise QAError(503, "qa_database_and_audit_unavailable") from None
             raise QAError(error.status if isinstance(error, DomainError) else 503, code) from None
 
-    def _run(self, actor, run_id, build_id, profile_name, token):
+    def resume_publication(self, actor, run_id, build_id, profile_name, token):
+        """Only publish a complete sealed result; workload execution is forbidden."""
+        return self._run(actor, run_id, build_id, profile_name, token, publication_only=True)
+
+    def _run(self, actor, run_id, build_id, profile_name, token, *, publication_only=False):
         profile = self.registry.get(profile_name)
         inputs = self.validator.load(actor, run_id, build_id, token, profile)
         c = inputs.context
@@ -164,6 +168,12 @@ class LocalTrustedQARunner:
             with self.factory.begin() as s:
                 run, proposal, _ = self.workspaces._authorize(s, actor, run_id, token)
                 row = self._row(s, actor, key)
+                if publication_only and (
+                    row is None
+                    or row.response.get("state")
+                    not in {"EXECUTING", "CAPTURED", "PUBLISHING", "READY"}
+                ):
+                    deny("qa_publication_proof_required")
                 if not row:
                     seconds = min(
                         profile.lifetime_seconds,
@@ -204,9 +214,13 @@ class LocalTrustedQARunner:
             pass  # Uniqueness serializes independent services; validate the winner below.
         execute = False
         with self.factory.begin() as s:
-            row = self._row(s, actor, key)
             self.builder._context(s, actor, run_id, c.import_id, token, c)
+            row = self._row(s, actor, key)
             j = self._journal(row, inputs, profile, actor, token)
+            if publication_only and (
+                j.state == "PENDING" or not self.vault.exists(self._capsule_row(j))
+            ):
+                deny("qa_publication_proof_required")
             if j.state == "PENDING":
                 if j.cleanup_requested:
                     deny("qa_cleanup_tombstone")
@@ -215,6 +229,8 @@ class LocalTrustedQARunner:
             elif j.state == "EXECUTING" and not self.vault.exists(self._capsule_row(j)):
                 deny("qa_execution_busy_or_unknown")
         if execute:
+            if publication_only:
+                deny("qa_recovery_execution_forbidden")
 
             def authorize_execution():
                 with self.factory() as session:
@@ -234,8 +250,8 @@ class LocalTrustedQARunner:
         if result.image_id != profile.image:
             deny("qa_result_image_mismatch")
         with self.factory.begin() as s:
-            row = self._row(s, actor, key)
             self.builder._context(s, actor, run_id, c.import_id, token, c)
+            row = self._row(s, actor, key)
             j = self._journal(row, inputs, profile, actor, token)
             if j.state == "EXECUTING":
                 j = self._state(
@@ -303,6 +319,7 @@ class LocalTrustedQARunner:
     def _publish(self, actor, run_id, token, profile, inputs, key, j, result):
         c, build = inputs.context, inputs.build
         with self.factory.begin() as s:
+            self.builder._context(s, actor, run_id, c.import_id, token, c)
             row = self._row(s, actor, key)
             j = self._journal(row, inputs, profile, actor, token)
             if j.state not in {"CAPTURED", "PUBLISHING", "READY"}:
@@ -392,8 +409,8 @@ class LocalTrustedQARunner:
             "application/json",
         )
         with self.factory.begin() as s:
-            row = self._row(s, actor, key)
             self.builder._context(s, actor, run_id, c.import_id, token, c)
+            row = self._row(s, actor, key)
             j = self._journal(row, inputs, profile, actor, token)
             if j.state == "READY":
                 if (

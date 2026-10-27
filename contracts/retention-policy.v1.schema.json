@@ -1,0 +1,41 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "name": {
+      "pattern": "^[a-z][a-z0-9-]{0,39}$",
+      "title": "Name",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "ephemeral_ttl_seconds": {
+      "default": 86400,
+      "maximum": 31536000,
+      "minimum": 0,
+      "title": "Ephemeral Ttl Seconds",
+      "type": "integer"
+    },
+    "approval_ttl_seconds": {
+      "default": 300,
+      "maximum": 3600,
+      "minimum": 1,
+      "title": "Approval Ttl Seconds",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "VersionedRetentionPolicy",
+  "type": "object"
+}

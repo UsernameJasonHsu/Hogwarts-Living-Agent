@@ -1,6 +1,6 @@
 # Hogwarts Living Agent OS — Specification Pack v0.4
 
-**Status:** M0/M1 and M2.1 through M2.3.4 implemented; see [implementation and verification status](docs/20-M2-IMPLEMENTATION-STATUS.md).
+**Status:** M1 / M2.1–M2.5 implemented; M2-RC1 security and CI remediation under evidence-based release gates. **M3 NOT READY.** See [current and historical status](docs/20-M2-IMPLEMENTATION-STATUS.md) and [RC1 operations](docs/29-RC1-RELEASE-GATES.md).
 **Date:** 2026-10-23  
 **Language:** zh-TW. Technical identifiers in English.
 
@@ -37,6 +37,10 @@
 ## Working principle
 不能以 Agent 的敘述作為「完成」證據。實際工件、Git Diff、受信任測試工具輸出、審批記錄才是工程事實。
 
+## Reading the timeline
+
+Current schema head is0007. Each milestone section below records its original scope/exclusions; it is not a current global absence claim. The latest completed pre-RC1 baseline is Linux1471 and Windows1309+162 skips. RC1 results require the new source-bound manifest and raw report; remote CI is still unverified.
+
 ## M0/M1 implementation
 
 - `apps/api/hogwarts`: FastAPI API、typed schemas、授權、CAS 狀態機與交易式事件紀錄。
@@ -47,7 +51,7 @@
 - [開發與環境設定](docs/06-DEVELOPMENT.md)、[API 說明](docs/07-API.md)、[決策紀錄](docs/adr/0002-m1-governance.md)。
 
 M1 使用 Fake Adapters；後續 M2 的 Workspace、Sandbox 與 QA 功能見下方。Fake QA
-明確標記 `verified: false`，不代表目標專案的測試已通過。M2.3.5、M2.4 與後續階段尚未實作。
+明確標記 `verified: false`，不代表目標專案的測試已通過。此歷史 M1 基準之後已實作 M2.3.5、M2.4 與 M2.5；M3 尚未開始。
 
 M2.1 新增內部 Git Workspace Manager；介面、安全限制與操作方式見
 [Git Workspaces](docs/10-GIT-WORKSPACES.md) 與 [ADR 0004](docs/adr/0004-m2-1-git-workspaces.md)。
@@ -107,3 +111,36 @@ Base+輸出快照；真實測試只在非 root、無網路、無主機掛載、�
 Artifact 保持 **unverified**；可信執行證明不代表內容、覆蓋率、獨立審查或合併已通過。
 詳見 [Trusted QA Runner](docs/19-TRUSTED-QA-RUNNER.md) 與 [ADR 0009](docs/adr/0009-m2-3-4-trusted-qa-runner.md)。
 Windows 僅為開發宿主；遠端 CI、M2.3.5、M2.4 與真實 Codex 未包含在本階段。
+
+
+## M2.3.5 End-to-End Verification and Human Review
+
+新增內部 PrototypeVerificationOrchestrator，串接既有 Workspace / Sandbox / Import / Patch / QA；產生不可變且維持 unverified 的 Review Bundle。Acceptance Gate 要求相同 Run、Base、Patch Snapshot、可信 QA Journal/HMAC 證據與固定映像的正數測試執行。
+
+本次新增的受信任 QA Profile 僅驗證既有 deterministic producer fixture；映像持有兩個固定測試，零測試不得通過。一般 unittest exit 0 不足以進入人類審查。READY_FOR_HUMAN_REVIEW 的 Run 對應 REVIEWING Proposal；人類需核對 Bundle SHA、版本、授權及期限，接受只建立 Merge Intent。
+
+操作與限制見 [Prototype Verification](docs/21-PROTOTYPE-VERIFICATION.md) 及 [ADR 0010](docs/adr/0010-m2-3-5-prototype-verification.md)。沒有新 SQL migration；Alembic head 保持 0006。完整實測驗收結果另附；M2.4、真實 Codex 與正式部署不在本次範圍。
+
+
+## M2.4.1 Lease Heartbeat and Fencing
+
+新增可信內部 DurableLeaseManager：持久化 heartbeat、generation/version CAS、撤銷與過期、發布交易 fencing 及可重試安全 Stop Hook。Migration 0007；既有證據維持 unverified。過期或 unknown execution 不會自動重播，也沒有 Resource Reconciler/GC。操作與限制見 [Lease Heartbeat & Fencing](docs/22-LEASE-HEARTBEAT-FENCING.md) 及 [ADR 0011](docs/adr/0011-m2-4-1-lease-heartbeat-fencing.md)。驗收狀態以本次實際測試報告為準；遠端 CI 與真實 Codex 未驗證。
+
+
+## M2.4.2 Resource Reconciler
+
+新增可信內部 ResourceInventory / IdentityVerifier / StateComparator / CleanupPlanner / CleanupExecutor，提供版本化 CleanupJournal、dry-run、KEEP / CLEANUP_ELIGIBLE / QUARANTINE、Run-first CAS / generation fencing、執行前重新 inspect 及精確 Docker ID / volume / registered worktree 清理。永久 Artifact、Review Bundle 與恢復證據保留；未知或不確定的資源不接管、不重播。沒有新增 SQL migration，head 保持 0007。詳見 [Resource Reconciler](docs/23-RESOURCE-RECONCILER.md) 與 [ADR 0012](docs/adr/0012-m2-4-2-resource-reconciler.md)；實測結果以外部驗收報告為準，遠端 CI 未驗證。沒有 Crash Recovery、Retention/GC、真實 Codex 或 SCM/部署動作。
+
+
+## M2.4.3 Crash Recovery and Workflow Reconciliation
+
+新增內部 CrashRecoveryCoordinator、WorkflowStateInspector、RecoveryClassifier、RecoveryPlanner／Executor、版本化 RecoveryJournal 與 Human Intervention Queue。預設 dry-run；只有已驗證的完整證據能透過 publication-only 入口重試發布，UNKNOWN workload 不重跑。合法終態與有充分 deterministic zero-cost 帳務證據的結算使用既有 M1 規則，Cleanup 仍由 M2.4.2 明確執行。既有 Artifact 保持 unverified；沒有新 SQL DDL，head 保持 0007。詳見 [Crash Recovery](docs/24-CRASH-RECOVERY.md) 與 [ADR 0013](docs/adr/0013-m2-4-3-crash-recovery.md)，真實測試結果以外部驗收報告為準。沒有 Retention/GC、真實 Codex、自動 commit/push/merge/deploy；遠端 CI 未驗證。
+
+### M2.4.4 Retention, Quotas and Operational Readiness
+
+Internal owner-controlled aggregate quota reservations, logical storage accounting, versioned retention, Holds, dry-run and explicitly approved ephemeral GC reuse M1 auth/fencing and the existing Reconciler. All permanent evidence stays unverified and retained. No automatic quarantine cleanup or UNKNOWN workload replay. See docs/25-RETENTION-OPERATIONS.md, docs/26-OPERATIONS-RUNBOOKS.md and ADR 0014. SQL head remains 0007. Controller admission is distinct from kernel/physical disk quota; deployment-wide wiring, remote CI, existing quarantine disposition and production readiness remain separate gates. No M3 implementation, real Codex or automatic SCM/deploy actions.
+
+
+### M2.5 Operational Gate Closure and M3 Readiness Preflight
+
+Canonical startup uses the explicit disabled/fake/operational factory. Operational HTTP dispatch requires a durable formal intent, existing governance/lease fencing, monetary reservation and aggregate quota admission before resource effects. Bound adapter/publication entrypoints reject direct bypass; cancellation and UNKNOWN preserve unconfirmed commitments. Existing unbound adapters remain trusted compatibility APIs, not Agent tools or an OS sandbox. See [formal entrypoints](docs/27-FORMAL-ENTRYPOINTS.md) and [ADR 0015](docs/adr/0015-m2-5-formal-entrypoints.md). CI now configures all six pinned Linux images and rejects skipped/incomplete suites; remote CI remains unverified until run. Four existing quarantine resources remain manual-only. No real Codex, M3 implementation, evidence promotion or SCM/deploy action. Actual acceptance and readiness remain subject to the delivered test evidence and unresolved operational gates.

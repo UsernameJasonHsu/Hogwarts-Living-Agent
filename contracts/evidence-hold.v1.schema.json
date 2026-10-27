@@ -1,0 +1,48 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "run_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "owner_id": {
+      "title": "Owner Id",
+      "type": "string"
+    },
+    "active": {
+      "title": "Active",
+      "type": "boolean"
+    },
+    "reason": {
+      "enum": [
+        "review",
+        "incident",
+        "legal",
+        "operator"
+      ],
+      "title": "Reason",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "run_id",
+    "owner_id",
+    "active",
+    "reason"
+  ],
+  "title": "EvidenceHold",
+  "type": "object"
+}

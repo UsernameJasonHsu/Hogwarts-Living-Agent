@@ -1,8 +1,11 @@
-name: M0-M2.3.2 verification
+name: M0-M2.5 verification
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     services:
       postgres:
         image: postgres:16
@@ -25,6 +28,11 @@ jobs:
       - run: python -m pip install -r requirements.lock
       - run: ruff check .
       - run: ruff format --check .
+      - name: Verify reviewed source, commit allowlist and context policy
+        run: python scripts/release_audit.py --output test-results/release-audit.json
+      - uses: docker/setup-buildx-action@v3
+      - name: Verify context probe BuildKit prerequisite
+        run: docker buildx version
       - name: Build deterministic Linux sandbox image
         run: docker build -t hogwarts-sandbox:ci infra/sandbox
       - name: Pin approved sandbox image for integration tests
@@ -33,7 +41,27 @@ jobs:
         run: docker build -t hogwarts-output-reader:ci infra/output-reader
       - name: Pin approved output reader image for integration tests
         run: echo "HOGWARTS_OUTPUT_READER_IMAGE=$(docker image inspect hogwarts-output-reader:ci --format '{{.Id}}')" >> "$GITHUB_ENV"
-      - run: pytest -v --junitxml=test-results/junit.xml
+      - name: Build and pin trusted QA image
+        run: |
+          docker build -t hogwarts-qa:ci -f infra/qa/Dockerfile .
+          echo "HOGWARTS_QA_IMAGE=$(docker image inspect hogwarts-qa:ci --format '{{.Id}}')" >> "$GITHUB_ENV"
+      - name: Build and pin review QA pass/fail/zero images
+        run: |
+          docker build -t hogwarts-review-pass:ci -f infra/review-qa/Dockerfile .
+          docker build -t hogwarts-review-fail:ci --build-arg 'REVIEW_EXPECTED=intentional failure' -f infra/review-qa/Dockerfile .
+          docker build -t hogwarts-review-zero:ci --build-arg REVIEW_ZERO_TESTS=1 -f infra/review-qa/Dockerfile .
+          echo "HOGWARTS_REVIEW_QA_IMAGE=$(docker image inspect hogwarts-review-pass:ci --format '{{.Id}}')" >> "$GITHUB_ENV"
+          echo "HOGWARTS_REVIEW_QA_FAIL_IMAGE=$(docker image inspect hogwarts-review-fail:ci --format '{{.Id}}')" >> "$GITHUB_ENV"
+          echo "HOGWARTS_REVIEW_QA_ZERO_IMAGE=$(docker image inspect hogwarts-review-zero:ci --format '{{.Id}}')" >> "$GITHUB_ENV"
+      - name: Validate image pins and preserve provenance
+        run: python scripts/ci_gate.py --images test-results/images.json
+      - name: Complete Linux suite with raw evidence
+        env:
+          HOGWARTS_VERIFICATION_EVIDENCE_DIR: test-results/examples
+        run: |
+          set -euo pipefail
+          python scripts/ci_runner.py --workers 4 --output test-results 2>&1 | tee test-results/pytest-raw.log
+          python scripts/ci_gate.py --junit test-results/junit.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:

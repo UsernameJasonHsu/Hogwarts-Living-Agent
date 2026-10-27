@@ -1,0 +1,69 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "intervention_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Intervention Id",
+      "type": "string"
+    },
+    "owner_id": {
+      "title": "Owner Id",
+      "type": "string"
+    },
+    "run_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "recovery_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Recovery Id",
+      "type": "string"
+    },
+    "generation": {
+      "title": "Generation",
+      "type": "integer"
+    },
+    "observation_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Observation Sha256",
+      "type": "string"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    },
+    "status": {
+      "default": "OPEN",
+      "enum": [
+        "OPEN",
+        "ACKNOWLEDGED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "intervention_id",
+    "owner_id",
+    "run_id",
+    "recovery_id",
+    "generation",
+    "observation_sha256",
+    "reason"
+  ],
+  "title": "HumanIntervention",
+  "type": "object"
+}

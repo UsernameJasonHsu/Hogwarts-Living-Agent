@@ -1,0 +1,171 @@
+{
+  "$defs": {
+    "Resource": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "maxLength": 150,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "container",
+            "volume",
+            "worktree",
+            "evidence",
+            "unknown"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "identifier": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Fingerprint",
+          "type": "string"
+        },
+        "disposition": {
+          "enum": [
+            "KEEP",
+            "CLEANUP_ELIGIBLE",
+            "QUARANTINE"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "reason": {
+          "pattern": "^[a-z0-9_]{1,100}$",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "kind",
+        "identifier",
+        "fingerprint",
+        "disposition",
+        "reason"
+      ],
+      "title": "Resource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "plan_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "run_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "owner_id": {
+      "title": "Owner Id",
+      "type": "string"
+    },
+    "actor_id": {
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "project_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Project Id",
+      "type": "string"
+    },
+    "generation": {
+      "minimum": 0,
+      "title": "Generation",
+      "type": "integer"
+    },
+    "lease_version": {
+      "minimum": 0,
+      "title": "Lease Version",
+      "type": "integer"
+    },
+    "binding_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Binding Sha256",
+      "type": "string"
+    },
+    "resources": {
+      "items": {
+        "$ref": "#/$defs/Resource"
+      },
+      "title": "Resources",
+      "type": "array"
+    },
+    "state": {
+      "default": "PLANNED",
+      "enum": [
+        "PLANNED",
+        "EXECUTING",
+        "COMPLETE",
+        "QUARANTINED",
+        "UNKNOWN"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "completed": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Completed",
+      "type": "array"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    }
+  },
+  "required": [
+    "plan_id",
+    "run_id",
+    "owner_id",
+    "actor_id",
+    "project_id",
+    "generation",
+    "lease_version",
+    "binding_sha256",
+    "resources",
+    "created_at"
+  ],
+  "title": "CleanupJournal",
+  "type": "object"
+}

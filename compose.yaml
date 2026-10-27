@@ -33,6 +33,7 @@ services:
       DATABASE_URL: postgresql+psycopg://hogwarts:${POSTGRES_PASSWORD}@postgres/hogwarts
       HUMAN_API_TOKEN: ${HUMAN_API_TOKEN:?Set HUMAN_API_TOKEN}
       WORKER_API_TOKEN: ${WORKER_API_TOKEN:?Set WORKER_API_TOKEN}
+      HOGWARTS_EXECUTION_MODE: ${HOGWARTS_EXECUTION_MODE:-disabled}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
       interval: 3s

@@ -295,7 +295,9 @@ def test_capsule_tamper_fails_closed(outputs, kind):
     p.chmod(0o600)
     if kind == "bytes":
         with p.open("r+b") as stream:
-            stream.write(b"X")
+            original = stream.read(1)
+            stream.seek(0)
+            stream.write(bytes([original[0] ^ 1]))
     elif kind == "hardlink":
         os.link(p, p.with_suffix(".extra"))
     elif kind == "symlink":

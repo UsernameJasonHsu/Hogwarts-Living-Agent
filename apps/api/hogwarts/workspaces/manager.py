@@ -65,6 +65,10 @@ class GitWorkspaceManager:
         project = session.get(Project, proposal.project_id)
         if not project or project.owner_id != actor.owner_id:
             reject("not_found", 404)
+        if cleanup:
+            from hogwarts.leases.fencing import lock_run
+
+            lock_run(session, run)
         if cleanup and actor.role == "human":
             return run, proposal, project
         if (
@@ -81,6 +85,10 @@ class GitWorkspaceManager:
             or utc(run.lease_expires_at) <= now()
         ):
             reject("inactive_workspace_lease", 403)
+        if not cleanup:
+            from hogwarts.leases.fencing import fence
+
+            fence(session, run)
         return run, proposal, project
 
     def _configuration(self, proposal, project):

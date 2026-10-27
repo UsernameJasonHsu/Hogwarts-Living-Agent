@@ -143,13 +143,25 @@ class LocalOutputImporter:
                 code,
             ) from None
 
-    def _import(self, actor, run_id, workspace_id, sandbox_id, token):
+    def resume_publication(self, actor, run_id, workspace_id, sandbox_id, token):
+        """Recovery entrypoint: never create intent or capture new output."""
+        return self._import(actor, run_id, workspace_id, sandbox_id, token, publication_only=True)
+
+    def _import(self, actor, run_id, workspace_id, sandbox_id, token, *, publication_only=False):
         try:
             with self.factory.begin() as session:
                 *_, fingerprint = self._binding(
                     session, actor, run_id, workspace_id, sandbox_id, token
                 )
-                if self._row(session, sandbox_id) is None:
+                existing = self._row(session, sandbox_id)
+                if publication_only and (
+                    existing is None
+                    or existing.state
+                    not in {"SNAPSHOTTING", "SNAPSHOT_READY", "IMPORTING", "IMPORTED"}
+                    or not self.vault.exists(existing)
+                ):
+                    deny("output_publication_proof_required")
+                if existing is None:
                     row = OutputImport(
                         run_id=run_id,
                         workspace_id=workspace_id,
@@ -179,6 +191,8 @@ class LocalOutputImporter:
             if row.request_hash != fingerprint:
                 deny("output_request_conflict")
             if row.state == "PENDING":
+                if publication_only:
+                    deny("output_publication_proof_required")
                 self._state(session, actor, row, "SNAPSHOTTING")
                 capture = True
             else:
@@ -206,7 +220,7 @@ class LocalOutputImporter:
             try:
                 if self.vault.exists(row):
                     archive, proof = self.vault.open(row)
-                elif capture and row.state == "SNAPSHOTTING":
+                elif capture and not publication_only and row.state == "SNAPSHOTTING":
                     archive, proof = self.controller.driver.export_output(sandbox, profile)
                     archive, proof = self.vault.seal(row, archive, proof)
                 else:

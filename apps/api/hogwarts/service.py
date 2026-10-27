@@ -472,6 +472,9 @@ def claim(session, actor, run_id, data, key):
     proposal = proposal_for(session, run.proposal_id, actor)
     if proposal.status != State.QUEUED:
         raise DomainError(409, "invalid_transition")
+    from hogwarts.leases.fencing import lock_run
+
+    lock_run(session, run)
     cas(
         session,
         proposal,
@@ -488,12 +491,17 @@ def claim(session, actor, run_id, data, key):
             PrototypeRun.id == run_id,
             PrototypeRun.status == "QUEUED",
             PrototypeRun.lease_token.is_(None),
+            PrototypeRun.lease_revoked_at.is_(None),
         )
         .values(
             status="CLAIMED",
             worker_id=actor.id,
             lease_token=token,
             lease_expires_at=expiry,
+            lease_generation=PrototypeRun.lease_generation + 1,
+            lease_issued_generation=PrototypeRun.lease_generation + 1,
+            lease_version=PrototypeRun.lease_version + 1,
+            lease_heartbeat_at=now(),
             started_at=now(),
         )
         .execution_options(synchronize_session=False)
@@ -504,6 +512,8 @@ def claim(session, actor, run_id, data, key):
         "run_id": run_id,
         "lease_token": token,
         "lease_expires_at": expiry.isoformat(),
+        "lease_generation": run.lease_generation + 1,
+        "lease_version": run.lease_version + 1,
         "version": proposal.version,
         "status": "CLAIMED",
     }
@@ -524,6 +534,9 @@ def execute(session, actor, run_id, data, key, adapters: Adapters):
         or utc(run.lease_expires_at) <= now()
     ):
         raise DomainError(409, "invalid_or_expired_lease")
+    from hogwarts.leases.fencing import fence
+
+    fence(session, run)
     project = owned(session, Project, proposal.project_id, actor)
     if proposal.status != State.QUEUED:
         raise DomainError(409, "invalid_transition")
@@ -648,9 +661,14 @@ def execute(session, actor, run_id, data, key, adapters: Adapters):
     return {**proposal_view(proposal), "run_id": run.id, "evidence": run.evidence}
 
 
-def cancel(session, actor, proposal_id, data, key):
+def cancel(session, actor, proposal_id, data, key, *, preserve_budget=False):
     require_human(actor)
     proposal = proposal_for(session, proposal_id, actor)
+    run = session.scalar(select(PrototypeRun).where(PrototypeRun.proposal_id == proposal.id))
+    if run:
+        from hogwarts.leases.fencing import lock_run
+
+        lock_run(session, run)
     cas(
         session,
         proposal,
@@ -661,10 +679,15 @@ def cancel(session, actor, proposal_id, data, key):
         reason="human cancellation",
         key=key,
     )
-    run = session.scalar(select(PrototypeRun).where(PrototypeRun.proposal_id == proposal.id))
+    if run:
+        from hogwarts.leases.manager import invalidate
+
+        # Cancellation and fencing invalidation share the governance transaction.
+        invalidate(session, actor, run, "human_cancelled")
     if run and run.status in {"QUEUED", "CLAIMED"}:
         run.status, run.ended_at = "CANCELLED", now()
-        release(session, run)
+        if not preserve_budget:
+            release(session, run)
     return proposal_view(proposal)
 
 

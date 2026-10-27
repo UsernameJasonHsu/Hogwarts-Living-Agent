@@ -1,3 +1,19 @@
+# Current status / historical record — M2-RC1
+
+Current implementation covers M1 and M2.1–M2.5, with RC1 security/CI remediation.
+Alembic head is0007. M3 is NOT READY; real Codex and production deployment are absent.
+Current required cases/source identity are versioned in validation/required-cases.v1.json;
+actual RC1 results belong to the separately delivered raw validation report.
+The last completed M2.5 baseline was Linux1471/0/0 and Windows1309/0/162.
+Those counts are historical, not a claim that modified RC1 bytes already passed.
+Remote CI remains UNVERIFIED. All Artifact assessments remain unverified.
+See [RC1 release gates](29-RC1-RELEASE-GATES.md).
+
+The original dated record below is retained verbatim. Its831-case totals, head0006,
+and per-milestone exclusions describe that earlier snapshot, not current status.
+
+---
+
 # M2 Implementation and Verification Status
 
 Recorded 2026-10-24. This consolidates the existing local implementation and
