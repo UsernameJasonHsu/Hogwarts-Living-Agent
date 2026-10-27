@@ -26,6 +26,7 @@ from hogwarts.reconciliation.docker import DockerResourceBackend
 from hogwarts.reconciliation.planner import ResourceReconciler
 from hogwarts.service import DomainError
 from hogwarts.workspaces.manager import GitWorkspaceManager
+from process_environment import child_environment, source_identity, source_root
 from recovery_support import real_orchestrator
 from sqlalchemy import select
 from test_verification import HUMAN
@@ -104,11 +105,7 @@ def test_real_linux_formal_entrypoint(workspace, monkeypatch, mode):
             }
             config.write_text(json.dumps(cfg), encoding="utf8")
             config.chmod(0o600)
-            env = {
-                "PATH": os.defpath,
-                "HOME": "/nonexistent",
-                "PYTHONPATH": "/app/apps/api:/app/tests",
-            }
+            env = child_environment()
             for key in (
                 "HOGWARTS_SANDBOX_IMAGE",
                 "HOGWARTS_OUTPUT_READER_IMAGE",
@@ -116,12 +113,14 @@ def test_real_linux_formal_entrypoint(workspace, monkeypatch, mode):
             ):
                 env[key] = os.environ[key]
             killed = subprocess.run(
-                [sys.executable, "tests/formal_process.py", str(config)],
+                [sys.executable, str(source_root() / "tests/formal_process.py"), str(config)],
+                cwd=source_root(),
                 env=env,
                 capture_output=True,
                 timeout=120,
             )
             assert killed.returncode == -signal.SIGKILL, (killed.returncode, killed.stdout.decode())
+            assert json.loads(marker.read_text())["source"] == source_identity()
             with pytest.raises(DomainError, match="formal_execution_uncertain"):
                 g.execute(w["actor"], w["run"], version, w["token"], "process-crash")
             with w["factory"]() as s:

@@ -11,11 +11,13 @@ from hogwarts.auth import Principal
 from hogwarts.db import make_engine, sessions
 from hogwarts.workspaces.contracts import RepositoryGrant
 from hogwarts.workspaces.manager import GitWorkspaceManager
+from process_environment import source_identity, source_root
 
 
 def main():
+    source = source_identity()
     path = Path(sys.argv[1]).resolve()
-    if not path.is_relative_to(Path("test-results/tmp").resolve()):
+    if not path.is_relative_to((source_root() / "test-results/tmp").resolve()):
         raise ValueError("unsafe_fixture_configuration")
     cfg = json.loads(path.read_text(encoding="utf8"))
     engine = make_engine(cfg["database"])
@@ -37,7 +39,14 @@ def main():
         r = g.quota.reserve(actor, run_id, key, token, profile)
         g.quota._transition(actor, run_id, r.reservation_id, token, "RESERVED", "IN_USE")
         Path(cfg["marker"]).write_text(
-            json.dumps({"phase": "quota_in_use_committed", "pid": os.getpid(), "run_id": run_id}),
+            json.dumps(
+                {
+                    "phase": "quota_in_use_committed",
+                    "pid": os.getpid(),
+                    "run_id": run_id,
+                    "source": source,
+                }
+            ),
             encoding="utf8",
         )
         os.kill(os.getpid(), signal.SIGKILL)

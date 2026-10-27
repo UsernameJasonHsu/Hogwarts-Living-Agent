@@ -4631,6 +4631,38 @@
       "test_unavailable_db_and_audit_reported[sqlite]"
     ],
     [
+      "tests.test_process_environment",
+      "test_current_source_identity_has_content_hashes"
+    ],
+    [
+      "tests.test_process_environment",
+      "test_inherited_environment_is_not_forwarded"
+    ],
+    [
+      "tests.test_process_environment",
+      "test_linked_fixture_source_rejected"
+    ],
+    [
+      "tests.test_process_environment",
+      "test_missing_fixture_source_rejected[apps/api/hogwarts/__init__.py]"
+    ],
+    [
+      "tests.test_process_environment",
+      "test_missing_fixture_source_rejected[tests/formal_process.py]"
+    ],
+    [
+      "tests.test_process_environment",
+      "test_relocated_checkout_resolves_current_source[runner checkout]"
+    ],
+    [
+      "tests.test_process_environment",
+      "test_relocated_checkout_resolves_current_source[runner-\\u9b54\\u6cd5 source]"
+    ],
+    [
+      "tests.test_process_environment",
+      "test_wrong_import_origin_rejected"
+    ],
+    [
       "tests.test_qa",
       "test_agent_uploaded_attestation_has_no_authority[postgresql]"
     ],
@@ -7573,9 +7605,9 @@
     "tests.test_rc1_inventory_order"
   ],
   "schema_version": 1,
-  "source_digest": "456b3b73d4d3ff99c5de4117b67f6c1d350ef28c8c3953df89fb918808b62e02",
+  "source_digest": "88ea26011184ccc8b3d629690a526e97ea601e347e7e5906c5e9d84e9d35fc69",
   "source_files": {
-    ".dockerignore": "b6a40828df05ddb3790eb8f11ded6b5ac45cfa8f60c17d7377aca814ae8ca5ad",
+    ".dockerignore": "0c628d94a2280f7a99889bf66cb087cbf5c54c8d31dd374d268453224feeac2c",
     ".github/workflows/ci.yml": "b9f76312222b81ab24c406ddc5a41e2db561073292d9d9d392a824fd76de21dc",
     ".gitignore": "77a451178d0359cd3faeefe4c159e3d9b1e87837fa0e9286e75803949c4b36f9",
     "AGENTS.md": "eded7803f40e4bb20e7896d45f11e6130535740adfc7f689d4842a8df4170da1",
@@ -7726,6 +7758,7 @@
     "docs/adr/0014-m2-4-4-retention-operations.md": "ad1cbe339b4fae49c88cdcfffde0e8b01e0e00271f0563201766e44901d3704a",
     "docs/adr/0015-m2-5-formal-entrypoints.md": "1885029a5a4c273f0ac56df4629702d90bc411c6211a27c29db3a4b7832d0f6f",
     "docs/adr/0016-rc1-security-ci-remediation.md": "cb135eed943720ceca25e87e50244441da4dd0091e6c7c508d658cd3d32c8be3",
+    "docs/adr/0017-rc3-a-restart-import-and-oom-diagnostics.md": "517935706d603cecb32a2bbbf84a9bdcdcf6977f082ace626702815cdbd38794",
     "infra/Dockerfile": "053bb4b761bae505f4b54d4c8b00857877c7ebc84f822628c430a6599264930f",
     "infra/migrations/env.py": "b6539bcc58377d4a76b7fe706247f2748ca2be30d133a316c3b27501ef29e691",
     "infra/migrations/script.py.mako": "ee5dd9a388ee59fd3d089670c2f60db5f5904da6f21cfe3bfc44d7f567ee1546",
@@ -7756,15 +7789,16 @@
     "scripts/release_audit.py": "be91103e02a81010085a51fcb08bfb878fc2555c87794f873fc150156119968f",
     "tests/conftest.py": "f31432383daaa57ecde9b2fa7630dfc923f7f280afde831bf1be7cbd14824911",
     "tests/formal_identity.py": "7a687c9975bfd7e90ba0ed5054db9d1b40d882dd6d98f4641aa7a0de52f08d8b",
-    "tests/formal_process.py": "01c95b375eff97398b4556214c36f3973aa48628ca15f029b794dbe4189d1553",
+    "tests/formal_process.py": "85e834d55ac666fe428fe6ab5770b7905fed5f34390f1e6edf939ca0c9161f80",
     "tests/formal_support.py": "da0a9981b1b444e0a1b3945d0eff60a8260706fe61e5c26d50423445975dd14b",
+    "tests/process_environment.py": "5760fc38bdf1b9ba4d0f13bf7828cf65b8b86978e3c902d9dd4470e9bf50ff97",
     "tests/rc1_support.py": "3afe1c97a9bead29fbee0856e093954f3828eae0a91857fa99bdeec32587081c",
     "tests/recovery_process.py": "28d4ae451af9f94f8d3fdd61eeebd9dd83e8acb1bafd16aa85832bebd039efc5",
     "tests/recovery_support.py": "55c3b653bb6d2dfb3fb08f10171e2aefd81bd55d7f48fb8924d7445a4d984626",
     "tests/test_artifacts.py": "56cdb0bd886794b9cbbdb0c610a1ae9f3fd189fd88a3586e2b3b17c301774482",
     "tests/test_formal.py": "9632cf1a1ac371d43c0cf54a49bf631bd851d43231cadd4852e7bb432ece47c2",
     "tests/test_formal_ci.py": "3c2e8d735bf5adb506e8bf79bc3d57fad8fae174df261b304332bd18cd8375b5",
-    "tests/test_formal_linux.py": "1ec864af2a74e1a52205b0f217d7d309e6244482de98ec95c613287b2a246a1d",
+    "tests/test_formal_linux.py": "64ce2f81be4c8038ea212360e1e71c41f183325d01ae7cdb947150843b3b9f32",
     "tests/test_formal_restart.py": "1959e2697165d2b076bb4b3a02174609381a345e0bd68c02196b60f4fe0b9442",
     "tests/test_formal_security.py": "bf321c17c3b20f3392455643e0f9383e288729f81179f0a1f5627d70412c6794",
     "tests/test_foundation.py": "995b1dab8a9bffd1c9f58938979cb44acbceff7606c2acd32ee57238e8443d94",
@@ -7783,6 +7817,7 @@
     "tests/test_outputs.py": "d47b83a9a9d3b65e268fd061883b88346630a1abf75935ec6c9e0fb5bff2d99d",
     "tests/test_patch_linux.py": "9dd020b07de397e56a135110b259c2f6aeffa1c0e669a832c9e0608776782916",
     "tests/test_patches.py": "162da7975539069ef4c0da316f0ff033f787cbb1490fb91d9f1163d545eb240f",
+    "tests/test_process_environment.py": "a533c0b0e7aa6690642e2c5ae7617047262343e8bd148eeb9c318be965fb7315",
     "tests/test_qa.py": "581ea389f216ac12f8263a7be416b8ec8fe05dde91d4793669b2a1c90badb9a8",
     "tests/test_qa_contracts.py": "97bb9427d97ed76fdfa11cfd0dfe08611af9b24d6bb8668ea3234f1102b1ce69",
     "tests/test_qa_linux.py": "ecb822c532e3560c54c3656b88dea75d1d12f687d23a872d7715bd28a1b2b0e1",
@@ -7804,7 +7839,7 @@
     "tests/test_verification_contracts.py": "8c452c545a83c752543299fa73f089878af08d6f18ef7410283e0f7a9f0413c7",
     "tests/test_verification_linux.py": "9a6472b5f76c1f8f59fe3816673457f8750e92ff52b4ba2f2e643dda085225fb",
     "tests/test_workspaces.py": "2ae340bc909a8e9949737a6082368b14113613afb1787f1474a09179bae4875b",
-    "validation/commit-allowlist.v1.json": "42eb40af3907915d899a6d1019afed2a06c8e282c87e5aeb54b44ef24f2a8536",
+    "validation/commit-allowlist.v1.json": "72781bfd6882b9f17da636f5c92da50d83de03c33d29d4f3cc0ffc78a0d4d8b4",
     "validation/history/m2-5-required-cases.v1.json": "da53bc7bdcff9f468dfd8dfdd90fe621818df7da79b44f229c7ae821ac634ddf",
     "workers/README.md": "e9689741497dbf3792d7cdc5d332abbc3f2a5702e23429474a594228aab7e46f",
     "workers/engineering/__init__.py": "26e7a90c52c7899dca1f9fe7259cc28dc72e903560ee9a94e500157abd9d34f8",
@@ -7813,5 +7848,5 @@
     "workers/scheduler/README.md": "d57d8037b8f34a5e29a89d0cbff26ff12c8162486f0db2de3ff8ff4dae9a3ee2"
   },
   "source_policy": "utf8-lf-v1",
-  "suite_version": "m2-rc1-r2"
+  "suite_version": "m2-rc3-a-v1"
 }
