@@ -14,8 +14,19 @@ $env:DATABASE_URL = 'postgresql+psycopg://USER:PASSWORD@localhost:5432/hogwarts'
 $env:HUMAN_API_TOKEN = '<generate-a-random-token-at-least-32-characters>'
 $env:WORKER_API_TOKEN = '<a-different-random-token-at-least-32-characters>'
 alembic upgrade head
-uvicorn hogwarts.main:create_app --factory --app-dir apps/api
+uvicorn hogwarts.entrypoints.bootstrap:create_formal_app --factory --app-dir apps/api
 ```
+
+Execution defaults to `HOGWARTS_EXECUTION_MODE=disabled`. For the pure M1 fake
+workflow, explicitly set it to `fake`; only the exact known fake adapters are
+accepted. Operational execution requires trusted operator code to construct a
+`FormalExecutionGateway` and pass it to `create_formal_app(mode="operational",
+gateway=...)`. Setting the environment variable alone fails startup. The gateway
+binds approved profiles, complete private storage roots, grants and durable quota
+configuration; Agent requests cannot supply adapters or deployment factories.
+See [formal entrypoints](27-FORMAL-ENTRYPOINTS.md). `main.create_app` with injected
+adapters is a trusted compatibility/test embedding API, not an approved deployment
+entrypoint. Never run Agent Python inside the trusted Controller.
 
 Secrets are environment-only. Configure distinct ASCII human/worker tokens, each
 at least 32 characters. Non-ASCII configuration fails closed with 503; invalid
@@ -54,4 +65,5 @@ describe implemented endpoints. Future world and real runtime endpoints are abse
 
 `apps/web`, `packages`, and the scheduler are placeholders. `contracts/` retains
 the original v1 document contracts; HTTP command schemas are separately versioned
-through `/api/v1` and exported OpenAPI. No M2–M5 implementation is included.
+through `/api/v1` and exported OpenAPI. M1/M2 deterministic components are present;
+M3–M5 and real Codex integration remain outside this milestone.

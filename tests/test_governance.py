@@ -7,9 +7,10 @@ from threading import Barrier
 
 import pytest
 from conftest import headers, post
-from engineering.worker import run_once
+from engineering.fake_worker import run_once
 from fastapi.testclient import TestClient
 from hogwarts.adapters import fake_adapters
+from hogwarts.entrypoints.bootstrap import create_formal_app
 from hogwarts.main import create_app
 from hogwarts.models import (
     Agent,
@@ -536,10 +537,11 @@ def test_schema_has_only_implemented_v1_routes(api):
     assert spec["components"]["securitySchemes"]["HTTPBearer"]["scheme"] == "bearer"
 
 
-def test_one_shot_worker_entrypoint(api, seed):
+def test_one_shot_worker_entrypoint(api, seed, engine):
     proposal = queued(api, seed)
-    api.headers.update(headers("worker"))
-    result = run_once(api, proposal["id"])
+    with TestClient(create_formal_app(engine, mode="fake"), headers=headers("worker")) as client:
+        result = run_once(client, proposal["id"])
+    assert result["mode"] == "fake-test"
     assert result["status"] == "AWAITING_HUMAN_REVIEW"
     assert result["evidence"]["verified"] is False
 

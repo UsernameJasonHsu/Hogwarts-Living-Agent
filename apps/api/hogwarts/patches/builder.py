@@ -152,13 +152,21 @@ class LocalGitPatchBuilder:
                 code,
             ) from None
 
-    def _build(self, actor, run_id, import_id, token):
+    def resume_publication(self, actor, run_id, import_id, token):
+        """Never construct an uncommitted build intent during recovery."""
+        return self._build(actor, run_id, import_id, token, publication_only=True)
+
+    def _build(self, actor, run_id, import_id, token, *, publication_only=False):
         inputs = self.validator.load(actor, run_id, import_id, token)
         c = inputs.context
         try:
             with self.factory.begin() as session:
                 self._context(session, actor, run_id, import_id, token, c)
                 row = self._row(session, actor, import_id)
+                if publication_only and (
+                    row is None or row.response.get("state") not in {"BUILT", "PUBLISHING", "READY"}
+                ):
+                    deny("patch_publication_proof_required")
                 if row is None:
                     row = IdempotencyRecord(
                         owner_id=actor.owner_id,
@@ -195,16 +203,20 @@ class LocalGitPatchBuilder:
             row = self._row(session, actor, import_id)
             state = self._journal(row, c)
             if state.state == "PENDING":
+                if publication_only:
+                    deny("patch_publication_proof_required")
                 state = self._state(session, actor, row, state, "BUILDING")
         error = None
         with self.factory.begin() as session:
+            self._context(session, actor, run_id, import_id, token, c)
             row = self._row(session, actor, import_id)
             state = self._journal(row, c)
-            self._context(session, actor, run_id, import_id, token, c)
             if state.state == "FAILED":
                 deny("patch_build_failed")
             try:
                 if state.state == "BUILDING":
+                    if publication_only:
+                        deny("patch_publication_proof_required")
                     patch, proof = self.git.construct(inputs)
                     checksum = hashlib.sha256(patch).hexdigest()
                     self.objects.publish(state.build_id, patch, checksum)

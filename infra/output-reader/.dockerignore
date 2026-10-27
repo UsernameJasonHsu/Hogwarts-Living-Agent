@@ -1,0 +1,5 @@
+# RC1 explicit files only.
+**
+!Dockerfile
+!.dockerignore
+!reader.py

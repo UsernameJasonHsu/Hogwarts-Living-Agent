@@ -1,0 +1,212 @@
+{
+  "$defs": {
+    "Decision": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "enum": [
+            "SAFE_RESUME",
+            "FINALIZE",
+            "MANUAL_REQUIRED"
+          ],
+          "title": "Classification",
+          "type": "string"
+        },
+        "action": {
+          "default": "NONE",
+          "enum": [
+            "NONE",
+            "IMPORT",
+            "PATCH",
+            "QA",
+            "VERIFICATION",
+            "SETTLE_BUDGET",
+            "CANCEL_METADATA"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "reason": {
+          "pattern": "^[a-z0-9_]{1,100}$",
+          "title": "Reason",
+          "type": "string"
+        },
+        "target_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Id"
+        }
+      },
+      "required": [
+        "classification",
+        "reason"
+      ],
+      "title": "Decision",
+      "type": "object"
+    },
+    "Observation": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "project_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Project Id",
+          "type": "string"
+        },
+        "generation": {
+          "title": "Generation",
+          "type": "integer"
+        },
+        "lease_version": {
+          "title": "Lease Version",
+          "type": "integer"
+        },
+        "fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Fingerprint",
+          "type": "string"
+        },
+        "stalled": {
+          "title": "Stalled",
+          "type": "boolean"
+        },
+        "decision": {
+          "$ref": "#/$defs/Decision"
+        },
+        "artifact_hashes": {
+          "additionalProperties": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Artifact Hashes",
+          "type": "object"
+        },
+        "proof_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proof Sha256"
+        },
+        "component_hashes": {
+          "additionalProperties": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "default": {},
+          "title": "Component Hashes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "run_id",
+        "project_id",
+        "generation",
+        "lease_version",
+        "fingerprint",
+        "stalled",
+        "decision",
+        "artifact_hashes"
+      ],
+      "title": "Observation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "recovery_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Recovery Id",
+      "type": "string"
+    },
+    "owner_id": {
+      "title": "Owner Id",
+      "type": "string"
+    },
+    "actor_id": {
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "observation": {
+      "$ref": "#/$defs/Observation"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "state": {
+      "default": "PLANNED",
+      "enum": [
+        "PLANNED",
+        "EXECUTING",
+        "COMPLETE",
+        "MANUAL_REQUIRED",
+        "UNKNOWN"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    },
+    "result": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Observation"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "recovery_id",
+    "owner_id",
+    "actor_id",
+    "observation",
+    "created_at"
+  ],
+  "title": "RecoveryJournal",
+  "type": "object"
+}

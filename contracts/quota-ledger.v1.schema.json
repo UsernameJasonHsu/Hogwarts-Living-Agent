@@ -1,0 +1,167 @@
+{
+  "$defs": {
+    "Capacity": {
+      "additionalProperties": false,
+      "properties": {
+        "slots": {
+          "default": 0,
+          "maximum": 1125899906842624,
+          "minimum": 0,
+          "title": "Slots",
+          "type": "integer"
+        },
+        "cpu_millis": {
+          "default": 0,
+          "maximum": 1125899906842624,
+          "minimum": 0,
+          "title": "Cpu Millis",
+          "type": "integer"
+        },
+        "memory_bytes": {
+          "default": 0,
+          "maximum": 1125899906842624,
+          "minimum": 0,
+          "title": "Memory Bytes",
+          "type": "integer"
+        },
+        "pids": {
+          "default": 0,
+          "maximum": 1125899906842624,
+          "minimum": 0,
+          "title": "Pids",
+          "type": "integer"
+        },
+        "storage_bytes": {
+          "default": 0,
+          "maximum": 1125899906842624,
+          "minimum": 0,
+          "title": "Storage Bytes",
+          "type": "integer"
+        }
+      },
+      "title": "Capacity",
+      "type": "object"
+    },
+    "QuotaReservation": {
+      "additionalProperties": false,
+      "properties": {
+        "reservation_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Reservation Id",
+          "type": "string"
+        },
+        "run_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "project_id": {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Project Id",
+          "type": "string"
+        },
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "generation": {
+          "title": "Generation",
+          "type": "integer"
+        },
+        "profile": {
+          "pattern": "^[a-z][a-z0-9-]{0,39}$",
+          "title": "Profile",
+          "type": "string"
+        },
+        "profile_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Profile Sha256",
+          "type": "string"
+        },
+        "request_key": {
+          "title": "Request Key",
+          "type": "string"
+        },
+        "demand": {
+          "$ref": "#/$defs/Capacity"
+        },
+        "state": {
+          "default": "RESERVED",
+          "enum": [
+            "RESERVED",
+            "IN_USE",
+            "COMPLETED",
+            "UNKNOWN",
+            "RELEASED"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result"
+        }
+      },
+      "required": [
+        "reservation_id",
+        "run_id",
+        "project_id",
+        "actor_id",
+        "generation",
+        "profile",
+        "profile_sha256",
+        "request_key",
+        "demand"
+      ],
+      "title": "QuotaReservation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "owner_id": {
+      "title": "Owner Id",
+      "type": "string"
+    },
+    "limits_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Limits Sha256",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "reservations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/QuotaReservation"
+      },
+      "title": "Reservations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "owner_id",
+    "limits_sha256"
+  ],
+  "title": "QuotaLedger",
+  "type": "object"
+}

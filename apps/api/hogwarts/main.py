@@ -34,11 +34,26 @@ Key = Annotated[
 ]
 
 
-def create_app(engine=None, adapters=None):
+def create_app(
+    engine=None,
+    adapters=None,
+    *,
+    formal_gateway=None,
+    enforce_fake_adapters=None,
+    execution_enabled=True,
+    execution_mode="compatibility-fake",
+):
+    """Compatibility construction; approved deployment uses formal bootstrap."""
     app = FastAPI(title="Hogwarts Governance", version="0.1.0")
     app.state.engine = engine if engine is not None else make_engine(database_url())
     factory = sessions(app.state.engine)
     app.state.adapters = adapters if adapters is not None else fake_adapters()
+    app.state.formal_gateway = formal_gateway
+    strict_fake = engine is None if enforce_fake_adapters is None else enforce_fake_adapters
+    if strict_fake:
+        from hogwarts.entrypoints.bootstrap import sealed_fake_check
+
+        check_fake = sealed_fake_check()
 
     @app.exception_handler(service.DomainError)
     async def domain_error(_, error):
@@ -52,7 +67,7 @@ def create_app(engine=None, adapters=None):
     def health():
         with app.state.engine.connect() as connection:
             connection.execute(text("SELECT 1"))
-        return {"status": "ok", "milestone": "M0/M1"}
+        return {"status": "ok", "milestone": "M0/M1", "execution_mode": execution_mode}
 
     @app.post("/api/v1/projects", tags=["grants"])
     def create_project(data: ProjectCreate, actor: Actor, key: Key):
@@ -143,14 +158,19 @@ def create_app(engine=None, adapters=None):
 
     @app.post("/api/v1/prototypes/{proposal_id}/cancel", tags=["prototypes"])
     def cancel(proposal_id: str, data: VersionCommand, actor: Actor, key: Key):
-        return mutate(
+        result = mutate(
             actor,
             key,
             "proposal.cancel",
             proposal_id,
             data,
-            lambda s: service.cancel(s, actor, proposal_id, data, key),
+            lambda s: service.cancel(
+                s, actor, proposal_id, data, key, preserve_budget=formal_gateway is not None
+            ),
         )
+        if formal_gateway:
+            result = {**result, "stop_state": formal_gateway.stop_cancelled(actor, proposal_id)}
+        return result
 
     @app.post("/api/v1/prototypes/{proposal_id}/decision", tags=["human approval"])
     def decision(proposal_id: str, data: HumanDecision, actor: Actor, key: Key):
@@ -210,13 +230,25 @@ def create_app(engine=None, adapters=None):
 
     @app.post("/api/v1/runs/{run_id}/execute", tags=["fake worker"])
     def execute(run_id: str, data: ExecuteCommand, actor: Actor, key: Key):
+        if formal_gateway:
+            return formal_gateway.execute(
+                actor, run_id, data.expected_version, data.lease_token, key
+            )
+
+        def dispatch(session):
+            if not execution_enabled:
+                raise service.DomainError(503, "formal_runtime_not_configured")
+            if strict_fake:
+                check_fake(app.state.adapters)
+            return service.execute(session, actor, run_id, data, key, app.state.adapters)
+
         return mutate(
             actor,
             key,
             "run.execute",
             run_id,
             data,
-            lambda s: service.execute(s, actor, run_id, data, key, app.state.adapters),
+            dispatch,
         )
 
     @app.get("/api/v1/prototypes/{proposal_id}/runs", tags=["fake worker"])

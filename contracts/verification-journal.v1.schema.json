@@ -1,0 +1,193 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "verification_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Verification Id",
+      "type": "string"
+    },
+    "run_id": {
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "worker_id": {
+      "title": "Worker Id",
+      "type": "string"
+    },
+    "lease_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Lease Hash",
+      "type": "string"
+    },
+    "request_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Request Hash",
+      "type": "string"
+    },
+    "runtime_profile": {
+      "title": "Runtime Profile",
+      "type": "string"
+    },
+    "qa_profile": {
+      "title": "Qa Profile",
+      "type": "string"
+    },
+    "profile_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Profile Sha256",
+      "type": "string"
+    },
+    "seal_key": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Seal Key",
+      "type": "string"
+    },
+    "workspace_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Workspace Id"
+    },
+    "sandbox_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sandbox Id"
+    },
+    "state": {
+      "default": "PENDING",
+      "enum": [
+        "PENDING",
+        "EXECUTING",
+        "CAPTURED",
+        "PUBLISHING",
+        "COMPLETE",
+        "UNKNOWN",
+        "BLOCKED"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "verdict": {
+      "anyOf": [
+        {
+          "enum": [
+            "READY_FOR_HUMAN_REVIEW",
+            "FAILED",
+            "BLOCKED",
+            "UNKNOWN"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Verdict"
+    },
+    "bundle_artifact_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bundle Artifact Id"
+    },
+    "bundle_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bundle Sha256"
+    },
+    "approval_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approval Id"
+    },
+    "proposal_version": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proposal Version"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    }
+  },
+  "required": [
+    "verification_id",
+    "run_id",
+    "worker_id",
+    "lease_hash",
+    "request_hash",
+    "runtime_profile",
+    "qa_profile",
+    "profile_sha256",
+    "seal_key"
+  ],
+  "title": "VerificationJournal",
+  "type": "object"
+}

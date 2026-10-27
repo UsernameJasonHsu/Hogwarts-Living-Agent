@@ -7,4 +7,4 @@ COPY . .
 ENV PYTHONPATH=/app/apps/api
 RUN useradd --create-home appuser
 USER appuser
-CMD ["uvicorn", "hogwarts.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "hogwarts.entrypoints.bootstrap:create_formal_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
